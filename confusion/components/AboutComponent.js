@@ -3,14 +3,16 @@ import { Card } from "react-native-elements";
 import {Text, FlatList} from "react-native";
 import { ListItem } from "react-native-elements";
 import {ScrollView} from "react-native";
-import { connect } from 'react-redux';
-import { baseUrl } from '../shared/baseUrl'
+import { connect } from "react-redux";
+import { baseUrl } from "../shared/baseUrl";
+import {Loading} from "./LoadingComponent";
+import * as Animatable from 'react-native-animatable';
 
 const mapStateToProps = state => {
     return {
-      leaders: state.leaders
+        leaders: state.leaders
     }
-  }
+}
 
 const History = () => {
     return (
@@ -25,7 +27,6 @@ const History = () => {
 }
 
 class AboutUs extends Component {
-    
 
     static navigationOptions = {
         title: "About Us"
@@ -41,28 +42,54 @@ class AboutUs extends Component {
                     title={item.name}
                     subtitle={item.description}
                     hideChevron={true}
-                     leftAvatar={{source: {uri: baseUrl + item.image}}}
+                    leftAvatar={{ source: {uri: baseUrl + item.image} }}
                 />
             );
         };
 
-        return (
-            <ScrollView>
-                <React.Fragment>
+        if(this.props.leaders.isLoading) {
+            return(
+                <ScrollView>
+                    <History />
+                    <Card
+                        title="Corporate Leadership">
+                        <Loading />
+                    </Card>
+                </ScrollView>
+            );
+        }
+        else if (this.props.leaders.errMsg) {
+            return (
+                <Animatable.View animation="fadeInDown" duration={2000} delay={1000}>
+                        <ScrollView>
                     <History />
                     <Card title="Corporate Leadership">
-                        <FlatList 
+                        <Text>{this.props.leaders.errMsg}</Text>
+                    </Card>
+                </ScrollView>
+                </Animatable.View>
+                
+            );
+        }
+        else {
+            return (
+                <ScrollView>
+                    <Animatable.View animation="fadeInDown" duration={2000} delay={1000}>
+                    <History />
+                    <Card title="Corporate Leadership">
+                        <FlatList
                             data={this.props.leaders.leaders}
-                            renderItem={renderLeader}
-                            keyExtractor={item => item.id.toString()}
+                            renderItem={renderLeaderItem}
+                            keyExtractor={(item) => item.id.toString()}
                         />
                     </Card>
-                </React.Fragment>
-            </ScrollView>
+                    </Animatable.View>
+                    
 
-
-        );
+                </ScrollView>
+            );
+        }
     }
 }
 
-export default connect(mapStateToProps)(About);
+export default connect(mapStateToProps)(AboutUs);
